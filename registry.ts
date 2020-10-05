@@ -1,5 +1,5 @@
 // Imports
-import type { Response } from "https://deno.land/std@0.73.0/http/server.ts";
+import type { Response, ServerRequest } from "https://deno.land/std@0.73.0/http/server.ts";
 
 export type PluginDesc = {
 	readonly name: string,
@@ -7,7 +7,7 @@ export type PluginDesc = {
 	readonly description: string,
 	readonly author: string,
 	readonly canHandle: (path: string) => boolean | Promise<boolean>,
-	readonly handle: (path: string) => Response | Promise<Response>,
+	readonly handle: (path: string, request: ServerRequest) => Response | Promise<Response>,
 };
 
 const registry = new Map<string, PluginDesc>();
