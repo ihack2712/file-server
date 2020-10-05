@@ -190,11 +190,14 @@ export async function server (
 			await req.__respond__(response as Response)
 				.then(() => {
 					logger.info(
-						"%s %s %d %s %s",
-						req.method,
-						(req.conn.remoteAddr as any).hostname,
-						response.status || 200,
-						_, req.url.pathname
+						"%s %s %d %s %s" + ((response.status!||0) >= 500 ? " - %s" : ""),
+						...[
+							req.method,
+							(req.conn.remoteAddr as any).hostname,
+							response.status || 200,
+							_, req.url.pathname,
+							...((response.status!||0) >= 500 ? [ response.body! ] : [])
+						]
 					);
 				})
 				.catch(error => {
