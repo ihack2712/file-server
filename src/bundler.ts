@@ -31,7 +31,7 @@ if (import.meta.main)
 	try
 	{
 		const [, output ] = await Deno.bundle(Deno.args[0]);
-		console.log(output);
+		console.log(`(async ()=>{${output}})();`);
 	} catch (error)
 	{
 		console.log(error.message);
