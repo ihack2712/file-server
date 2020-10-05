@@ -242,8 +242,14 @@ export async function server (
 							status: 200,
 							headers: data.headers
 						});
-					} else if (typescript && ext === ".ts")
-					{
+					} else if (
+						typescript && (
+							ext === ".ts" ||
+							ext === ".js" ||
+							ext === ".tsx" ||
+							ext === ".jsx"
+						)
+					) {
 						try
 						{
 							let body = await bundle(directory, path);
