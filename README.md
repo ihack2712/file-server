@@ -22,7 +22,7 @@ deno install \
 	--allow-run \
 	-f \
 	-n fs \
-	https://deno.land/x/file-server/cli.ts
+	https://deno.land/x/fileserver/cli.ts
 ```
 
 ## Usage
