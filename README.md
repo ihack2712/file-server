@@ -17,7 +17,7 @@ An on the go file-server to get you quickøy started on a front-end.
 ```sh
 deno install \
 	--unstable \
-	--allow-read=$(cwd),$(which deno) \
+	--allow-read=$(pwd),$(which deno) \
 	--allow-net \
 	--allow-run \
 	-f \
