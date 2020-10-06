@@ -68,7 +68,7 @@ async function indexDirectory (req: Request)
 		<h1>Directory Listing</h1>
 		<p>${req.url.pathname}</p>
 		<ul>
-			${(await getEntries(req.path)).map(entry => `<li><a href="${req.url.pathname}/${entry.name}">${entry.name}</a>${entry.size !== undefined ? ` (${entry.size})` : ""}</li>`).join("")}
+			${(await getEntries(req.path)).map(entry => `<li><a href="./${req.url.pathname}/${entry.name}">${entry.name}</a>${entry.size !== undefined ? ` (${entry.size})` : ""}</li>`).join("")}
 		</ul>
 	</body>
 </html>
