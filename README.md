@@ -31,6 +31,8 @@ deno install \
 
 - **Embedded JavaScript**. [FileServer](https://deno.land/x/fileserver) can serve embedded javascript (server side) files. Enable using `-e`. **Note:** The output of `.ejs` files aren't cached. (See screenshot: https://i.loli.net/2020/10/06/J46OQ5BRCpKeNAo.png)
 
+- **Custom index files.** [FileServer](https://deno.land/x/fileserver) let's you add custom index files on the server. Index files `index.html` will always exist. If .ejs is enabled then `index.ejs` will automatically be added. You can add multiple index files by using `-i <file> -i <file>`. (See screenshots: https://i.loli.net/2020/10/06/yLJYjlZmPfON7n1.png, https://i.loli.net/2020/10/06/QsvtaFg7PTEKec3.png)
+
 - **TLS**. Enable HTTPS by including a certificate and a key file. Enable by using both `-c <certFile> -k <keyFile>`. (See screenshots: https://i.loli.net/2020/10/06/jCfspmAeBRgN57G.png, https://i.loli.net/2020/10/06/UzMo78QXdwkYOls.png)
 
 ## Usage
