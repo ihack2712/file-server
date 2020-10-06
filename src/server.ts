@@ -67,6 +67,7 @@ async function indexDirectory (req: Request)
 <html>
 	<head>
 		<meta charset="UTF-8" />
+		<title>${req.url.pathname}</title>
 	</head>
 	<body>
 		<h1>Directory Listing</h1>
