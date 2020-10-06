@@ -40,20 +40,24 @@ async function findIndexInDirectory (path: string, indexes: string[]): Promise<s
 	}
 }
 
-async function getEntries (dir: string)
+async function getEntries (dir: string): Promise<({ name: string, size?: string })[]>
 {
-	const entries: ({ name: string, size?: string })[] = [
-		{ name: "." },
-		{ name: ".." }
-	];
+	const directories: ({ name: string })[] = [ ];
+	const files: ({ name: string, size: string })[] = [ ];
 	for await (let entry of Deno.readDir(dir))
 	{
-		if (entry.isFile || entry.isDirectory) entries.push({
+		if (entry.isFile) files.push({
 			name: entry.name,
-			size: entry.isFile ? toReadableSize((await Deno.lstat(join(dir, entry.name))).size) as string : undefined
+			size: toReadableSize((await Deno.lstat(join(dir, entry.name))).size)
 		});
+		if (entry.isDirectory) directories.push({ name: entry.name });
 	}
-	return entries.sort((a, b) => a.name.localeCompare(b.name));
+	return [
+		{ name: "." },
+		{ name: ".." },
+		...directories.sort((a, b) => a.name.localeCompare(b.name)),
+		...files.sort((a, b) => a.name.localeCompare(b.name))
+	];
 }
 
 async function indexDirectory (req: Request)
@@ -68,7 +72,7 @@ async function indexDirectory (req: Request)
 		<h1>Directory Listing</h1>
 		<p>${req.url.pathname}</p>
 		<ul>
-			${(await getEntries(req.path)).map(entry => `<li><a href="./${req.url.pathname}/${entry.name}">${entry.name}</a>${entry.size !== undefined ? ` (${entry.size})` : ""}</li>`).join("")}
+			${(await getEntries(req.path)).map(entry => `<li><a href="${resolve(join(req.url.pathname, entry.name))}">${entry.name}</a>${entry.size !== undefined ? ` (${entry.size})` : ""}</li>`).join("")}
 		</ul>
 	</body>
 </html>
