@@ -184,37 +184,41 @@ export async function server (
 				}
 			}
 			response.headers.set("Content-Length", response.body?.toString().length.toString() || "".length.toString());
+			if (cors)
+				response.headers.set("Access-Control-Allow-Origin", req.headers.get("origin") || req.headers.get("Origin") || "*");
 			if (response.cache === true)
 			{
 				response.cache = true;
 				cached.save(req, response as Response);
 			}
-			if (cors)
-				response.headers.set("Access-Control-Allow-Origin", req.headers.get("origin") || req.headers.get("Origin") || "*");
 			const _ = ms(Date.now() - start) as string;
-			await req.__respond__(response as Response)
-				.then(() => {
-					logger.info(
-						"%s %s %d %s %s" + ((response.status!||0) >= 500 ? " - %s" : ""),
-						...[
-							req.method,
-							(req.conn.remoteAddr as any).hostname,
-							response.status || 200,
-							_, req.url.pathname,
-							...((response.status!||0) >= 500 ? [ response.body! ] : [])
-						]
-					);
-				})
-				.catch(error => {
-					logger.error(
-						"%s %s %d %s %s - %s",
+			if (response.body instanceof Uint8Array) response.body = response.body.reduce((str, char) => str += String.fromCharCode(char), "");
+			await req.__respond__({
+				body: response.body,
+				headers: response.headers,
+				status: response.status,
+				trailers: response.trailers
+			}).then(() => {
+				logger.info(
+					"%s %s %d %s %s" + ((response.status!||0) >= 500 ? " - %s" : ""),
+					...[
 						req.method,
 						(req.conn.remoteAddr as any).hostname,
-						response.status || 0,
+						response.status || 200,
 						_, req.url.pathname,
-						debug ? error.stack : error.message
-					);
-				});
+						...((response.status!||0) >= 500 ? [ response.body! ] : [])
+					]
+				);
+			}).catch(error => {
+				logger.error(
+					"%s %s %d %s %s - %s",
+					req.method,
+					(req.conn.remoteAddr as any).hostname,
+					response.status || 0,
+					_, req.url.pathname,
+					debug ? error.stack : error.message
+				);
+			});
 		};
 		
 		logger.debug(
@@ -227,7 +231,10 @@ export async function server (
 		// Check if the cache already has a response
 		// for this request.
 		let cachedResponse = cached.response(req);
-		if (cachedResponse) await req.respond(cachedResponse);
+		if (cachedResponse)
+		{
+			await req.respond(cachedResponse);
+		}
 		else
 		{
 			try
