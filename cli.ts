@@ -60,16 +60,10 @@ const _ = await new Command()
 		
 		const cwd = Deno.cwd();
 		await Deno.permissions.revoke({ name: "read", path: "." });
-		
-		if (!directory)
-		{
-			await grantOrThrow({ name: "read", path: cwd });
-			directory = cwd;
-		} else
-		{
-			directory = resolve(cwd, directory);
-			await grantOrThrow({ name: "read", path: directory });
-		}
+		await Deno.permissions.revoke({ name: "read", path: cwd });
+		if (!directory) directory = cwd;
+		directory = resolve(cwd, directory);
+		await grantOrThrow({ name: "read", path: directory });
 		
 		const PORT = port ?? 0;
 		const HOST = host ?? "127.0.0.1";
