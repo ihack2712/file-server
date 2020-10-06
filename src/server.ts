@@ -193,6 +193,7 @@ export async function server (
 			}
 			const _ = ms(Date.now() - start) as string;
 			if (response.body instanceof Uint8Array) response.body = response.body.reduce((str, char) => str += String.fromCharCode(char), "");
+			const sizeStr = debug ? " (" + toReadableSize((response.body as string || "").length) + ")" : "";
 			await req.__respond__({
 				body: response.body,
 				headers: response.headers,
@@ -200,33 +201,35 @@ export async function server (
 				trailers: response.trailers
 			}).then(() => {
 				logger.info(
-					"%s %s %d %s %s" + ((response.status!||0) >= 500 ? " - %s" : ""),
+					"%s %s %d %s %s%s" + ((response.status!||0) >= 500 ? " - %s" : ""),
 					...[
 						req.method,
 						(req.conn.remoteAddr as any).hostname,
 						response.status || 200,
 						_, req.url.pathname,
+						sizeStr,
 						...((response.status!||0) >= 500 ? [ response.body! ] : [])
 					]
 				);
 			}).catch(error => {
 				logger.error(
-					"%s %s %d %s %s - %s",
+					"%s %s %d %s %s%s - %s",
 					req.method,
 					(req.conn.remoteAddr as any).hostname,
 					response.status || 0,
 					_, req.url.pathname,
+					sizeStr,
 					debug ? error.stack : error.message
 				);
 			});
 		};
 		
-		logger.debug(
-			"%s %s %s",
-			req.method,
-			(req.conn.remoteAddr as any).hostname,
-			req.url.pathname
-		);
+		// logger.debug(
+		// 	"%s %s %s",
+		// 	req.method,
+		// 	(req.conn.remoteAddr as any).hostname,
+		// 	req.url.pathname
+		// );
 		
 		// Check if the cache already has a response
 		// for this request.
@@ -268,10 +271,11 @@ export async function server (
 					) {
 						try
 						{
-							let body = await bundle(directory, path);
-							body = body.replaceAll(directory, "/");
+							let _ = await bundle(directory, path);
+							_.output = _.output.replaceAll(directory, "/");
+							if (_.error) throw new Error(_.output);
 							await req.respond({
-								body,
+								body: _.output,
 								status: 200,
 								headers: {
 									"Content-Type": fileType("_.js")
@@ -281,7 +285,7 @@ export async function server (
 						} catch (error)
 						{
 							await req.respond({
-								body: debug ? error.stack : error.message,
+								body: error.message,
 								status: 500
 							});
 						}

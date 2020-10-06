@@ -2,7 +2,7 @@
  * Bundle a path.
  * @param path The path to bundle.
  */
-export async function bundle (dir: string, path: string): Promise<string>
+export async function bundle (dir: string, path: string): Promise<{ output: string, error: boolean }>
 {
 	const proc = Deno.run({
 		stdout: "piped",
@@ -17,23 +17,41 @@ export async function bundle (dir: string, path: string): Promise<string>
 			path
 		]
 	});
-	const status = (await proc.status()).success;
-	if (status)
+	if ((await proc.status()).success)
 	{
-		return (await proc.output()).reduce((str, byte) => str += String.fromCharCode(byte), "").trim();
+		return {
+			output: (await proc.output()).reduce((str, byte) => str += String.fromCharCode(byte), "").trim(),
+			error: false
+		};
 	}
-	const message = (await proc.stderrOutput()).reduce((str, byte) => str += String.fromCharCode(byte), "");
-	throw new Error(message.trim());
+	const output = (await proc.stderrOutput()).reduce((str, byte) => str += String.fromCharCode(byte), "").replace(/\u001b[^m]+m/g, "");
+	return {
+		output,
+		error: true
+	};
 }
 
 if (import.meta.main)
 {
 	try
 	{
-		const [, output ] = await Deno.bundle(Deno.args[0]);
-		console.log(`(async ()=>{${output}})();`);
+		const [, output ] = await Deno.bundle(Deno.args[0], undefined, {
+			lib: [ "esnext", "dom" ],
+			jsx: "react"
+		});
+		console.log(
+			`(async ()=>{${output}})();`
+				.replace(
+					"return r.has(id) ? gExpA(id) : import(mid);",
+					"return r.has(id) ? gExpA(id) : await import(mid);"
+				).replace(
+					"import: (m) => dI(m, id),",
+					"import: async (m) => await dI(m, id),"
+				)
+		);
 	} catch (error)
 	{
-		console.log(error.message);
+		console.error(error.message);
+		Deno.exit(1);
 	}
 }
