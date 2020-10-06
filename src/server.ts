@@ -189,7 +189,7 @@ export async function server (
 				cached.save(req, response as Response);
 			}
 			if (cors)
-				response.headers.set("Access-Control-Allow-Origin", "*");
+				response.headers.set("Access-Control-Allow-Origin", req.headers.get("origin") || req.headers.get("Origin") || "*");
 			const _ = ms(Date.now() - start) as string;
 			await req.__respond__(response as Response)
 				.then(() => {
