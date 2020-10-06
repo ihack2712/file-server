@@ -56,13 +56,12 @@ const GB = MB * 1024;
 const TB = GB * 1024;
 const PB = TB * 1024;
 
-const units: [ string, number ][] = [
-	[  "bytes",  1 ],
-	[ "kb", KB ],
-	[ "mb", MB ],
-	[ "gb", GB ],
-	[ "tb", TB ],
-	[ "pb", PB ]
+const units: string[] = [
+	"bytes",
+	"kb",
+	"mb",
+	"gb",
+	"tb"
 ];
 
 /**
@@ -71,11 +70,12 @@ const units: [ string, number ][] = [
  */
 export function toReadableSize (bytes: number): string
 {
-	let previous: [ string, number ];
-	for (let [ suffix, size ] of units)
+	for (let i = units.length; i > 0; i--)
 	{
-		const s = bytes / size;
-		if (s >= 1) previous = [ suffix, s ];
+		const unitSize = i > 1 ? 1024 ** (i - 1) : i;
+		const size = bytes / unitSize;
+		if (size < 1 && i > 1) continue;
+		return readableNumber(size, i > 1 ? 2 : 0) + " " + units[i - 1];
 	}
-	return readableNumber(previous![1], previous![0] !== "bytes" ? 2 : 0) + " " + previous![0];
+	return readableNumber(bytes, 0) + " " + units[0];
 }
