@@ -58,17 +58,17 @@ const _ = await new Command()
 		directory?: string
 	) => {
 		
+		const cwd = Deno.cwd();
+		await Deno.permissions.revoke({ name: "read", path: "." });
+		
 		if (!directory)
 		{
-			await grantOrThrow({ name: "read", path: "." });
-			directory = Deno.cwd();
+			await grantOrThrow({ name: "read", path: cwd });
+			directory = cwd;
 		} else
 		{
+			directory = resolve(cwd, directory);
 			await grantOrThrow({ name: "read", path: directory });
-			directory = resolve(Deno.cwd(), directory);
-			if (directory !== Deno.cwd())
-				await Deno.permissions.revoke({ name: "read", path: "." });
-			await grantOrThrow({ name: "read", path: directory! });
 		}
 		
 		const PORT = port ?? 0;
