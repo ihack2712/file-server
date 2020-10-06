@@ -40,7 +40,7 @@ if (import.meta.main)
 			jsx: "react"
 		});
 		console.log(
-			`(async ()=>{${output}})();`
+			`(async ()=>{${output}})();//`
 				.replace(
 					"return r.has(id) ? gExpA(id) : import(mid);",
 					"return r.has(id) ? gExpA(id) : await import(mid);"
