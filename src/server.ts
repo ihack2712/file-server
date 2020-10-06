@@ -242,6 +242,7 @@ export async function server (
 				const path = await findIndexInDirectory(req.path, indexes);
 				if (path)
 				{
+					req.path = path;
 					const ext = extname(path).toLowerCase();
 					if (ejs && ext === ".ejs")
 					{
