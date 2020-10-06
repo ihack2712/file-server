@@ -64,10 +64,10 @@ const _ = await new Command()
 			directory = Deno.cwd();
 		} else
 		{
-			await grantOrThrow({ name: "read", path: ".," + directory });
+			await Deno.permissions.revoke({ name: "read", path: "." });
+			await grantOrThrow({ name: "read", path: directory });
 			directory = resolve(Deno.cwd(), directory);
-			// if (directory !== Deno.cwd())
-				await Deno.permissions.revoke({ name: "read", path: "." });
+			await Deno.permissions.revoke({ name: "read", path: "." });
 			await grantOrThrow({ name: "read", path: directory! });
 		}
 		
