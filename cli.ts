@@ -1,8 +1,8 @@
 // Imports
 import { ms } from "https://deno.land/x/ms@v0.1.0/ms.ts";
-import { Command } from "https://deno.land/x/cliffy@v0.14.2/command/mod.ts";
-import { grantOrThrow } from "https://deno.land/std@0.73.0/permissions/mod.ts";
-import { resolve } from "https://deno.land/std@0.73.0/path/mod.ts";
+import { Command } from "https://deno.land/x/cliffy@v0.16.0/command/mod.ts";
+import { grantOrThrow } from "https://deno.land/std@0.81.0/permissions/mod.ts";
+import { resolve } from "https://deno.land/std@0.81.0/path/mod.ts";
 import { server } from "./mod.ts";
 
 const _ = await new Command()
@@ -57,14 +57,14 @@ const _ = await new Command()
 		},
 		directory?: string
 	) => {
-		
+
 		const cwd = Deno.cwd();
 		await Deno.permissions.revoke({ name: "read", path: "." });
 		await Deno.permissions.revoke({ name: "read", path: cwd });
 		if (!directory) directory = cwd;
 		directory = resolve(cwd, directory);
 		await grantOrThrow({ name: "read", path: directory });
-		
+
 		const PORT = port ?? 0;
 		const HOST = host ?? "127.0.0.1";
 		const colors = noColor !== true;
@@ -75,7 +75,7 @@ const _ = await new Command()
 		const enableTS = typescript === true;
 		const CERT = cert ?? "";
 		const KEY = key ?? "";
-		const indexes = [ ...(enableEJS ? [ "index.ejs" ] : []), "index.html", ...(index ?? [ ]) ];
+		const indexes = [...(enableEJS ? ["index.ejs"] : []), "index.html", ...(index ?? [])];
 		const debugging = debug === true;
 		const caching = cache === true;
 		const lms = ((_: number = 30_000_000) => {
@@ -84,9 +84,8 @@ const _ = await new Command()
 			if (lifetime) return ms(lifetime) as number || _;
 			return _;
 		})();
-		
-		if (CERT || KEY)
-		{
+
+		if (CERT || KEY) {
 			if (CERT === "" || KEY === "")
 				throw new Error("Both cert and key must be defined to use TLS!");
 			await grantOrThrow(
@@ -94,9 +93,9 @@ const _ = await new Command()
 				{ name: "read", path: KEY }
 			);
 		}
-		
+
 		await grantOrThrow({ name: "net" });
-		
+
 		await server({
 			directory,
 			port: PORT, host: HOST,
